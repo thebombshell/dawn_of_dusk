@@ -165,15 +165,58 @@ unsigned int mutex_try(op_mutex t_mutex) {
 	return result == 0 ? 1 : 0;
 }
 
-void semaphore_init(op_semaphore* t_semaphore, unsigned long long int t_value, unsigned long long int t_limit);
+typedef struct {
+	
+	HANDLE semaphore;
+	
+} semaphore_impl;
 
-void semaphore_final(op_semaphore* t_semaphore);
+void semaphore_init(op_semaphore* t_semaphore, unsigned long long int t_value, unsigned long long int t_limit) {
+	
+	assert(t_semaphore && t_limit);
+	
+	semaphore_impl* semahpore = (semahpore_impl*)malloc(sizeof(semaphore_impl));
+	semaphore->semaphore = CreateSemahpore(0, (LONG)t_value, (LONG)t_limit, 0);
+	assert(semaphore->semaphore);
+	*t_semaphore = (op_semaphore)semahpore;
+}
 
-void semahpore_wait(op_semaphore t_semaphore);
+void semaphore_final(op_semaphore* t_semaphore) {
+	
+	assert(t_semaphore);
+	
+	semaphore_impl* semaphore = (semaphore_impl*)t_semahpore;
+	CloseHandle(semaphore->semaphore);
+	free(*t_semaphore);
+	*t_semahpore = 0;
+}
 
-unsigned int semahpore_wait_timeout(op_semaphore t_semaphore, unsigned long long int t_ms);
+void semahpore_wait(op_semaphore t_semaphore) {
+	
+	assert(t_mutex);
+	
+	mutex_impl* mutex = (mutex_impl*)t_mutex;
+	WaitForSingleObject(mutex->mutex, INFINITE);
+}
 
-unsigned int semahpore_try(op_semaphore t_semaphore);
+
+unsigned int semahpore_wait_timeout(op_semaphore t_semaphore, unsigned long long int t_ms) {
+	
+	assert(t_mutex);
+	
+	mutex_impl* mutex = (mutex_impl*)t_semaphore;
+	DWORD result = WaitForSingleObject(mutex->mutex, (DWORD)t_ms);
+	return result == 0 ? 1 : 0;
+}
+
+unsigned int semahpore_try(op_semaphore t_semaphore) {
+	
+	assert(t_mutex);
+	
+	mutex_impl* mutex = (mutex_impl*)t_mutex;
+	DWORD result = WaitForSingleObject(mutex->mutex, 0);
+	return result == 0 ? 1 : 0;
+}
 
 void semaphore_signal(op_semaphore t_semaphore, unsigned long long int t_value);
 
