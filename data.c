@@ -156,28 +156,13 @@ void link_list_final(link_list* t_list)
 	}
 }
 
-typedef struct
-{
-	const char hash;
-	const char* const key;
-	void* data;
-
-} hash_pair, *p_hash_pair;
-
-typedef struct
-{
-	link_list pairs;
-	p_link buckets[256];
-
-} hash_list, *p_hash_list;
-
-char hash_string(const char* t_string)
+unsigned char hash_string(const char* t_string)
 {
 	assert(t_string);
 
-	char hash = 7;
+	unsigned char hash = 7;
 	const char* c = t_string;
-	for (; c != '\0'; ++c)
+	for (; *c != '\0'; ++c)
 	{
 		hash = ((hash * 31) + *c) & 0xff;
 	}
@@ -190,7 +175,7 @@ p_hash_pair hash_pair_alloc(const char* t_key, void* t_data)
 
 	p_hash_pair pair = (p_hash_pair)malloc(sizeof(hash_pair) + strlen(t_key));
 	char* key = (char*)(pair + 1);
-	char hash = hash_string(t_key);
+	unsigned char hash = hash_string(t_key);
 	strcpy(key, t_key);
 	hash_pair temp = {hash, key, t_data};
 	memcpy(&temp, pair, sizeof(hash_pair));
@@ -235,7 +220,7 @@ p_link hash_list_find(hash_list* t_list, const char* t_key)
 {
 	assert(t_list && t_key);
 
-	char hash = hash_string(t_key);
+	unsigned char hash = hash_string(t_key);
 	p_link link = t_list->buckets[hash];
 	p_hash_pair pair = (p_hash_pair)link->data;
 
@@ -256,7 +241,7 @@ p_link hash_list_insert(hash_list* t_list, const char* t_key, void* t_data)
 	assert(t_list && t_key && !hash_list_find(t_list, t_key));
 
 	p_hash_pair pair = hash_pair_alloc(t_key, t_data);
-	char hash = hash_string(t_key);
+	unsigned char hash = hash_string(t_key);
 
 	p_link prev = t_list->buckets[hash];
 	p_link link = link_list_insert(prev, pair);

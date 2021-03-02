@@ -19,6 +19,6 @@ typedef struct {
 
 void dod_object_extension_actor_init(dod_object_extension_actor* t_extension, dod_actor_tick_func tick);
 
-void dod_object_extension_actor_final(dod_object_extension_header* t_header);
+void dod_object_extension_actor_final(void* t_extension);
 
 #endif

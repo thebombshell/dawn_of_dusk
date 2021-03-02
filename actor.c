@@ -16,10 +16,15 @@ void dod_object_extension_actor_init(dod_object_extension_actor* t_extension, do
 	t_extension->tick = t_tick;
 }
 
-void dod_object_extension_actor_final(dod_object_extension_header* t_extension) {
+void dod_object_extension_actor_final(void* t_extension) {
 	
 	assert(t_extension);
 	
 	dod_object_extension_actor* actor = (dod_object_extension_actor*)t_extension;
-	t_extension->tick = 0;
+	
+	assert(actor->header.type == DOD_OBJECT_EXTENSION_ACTOR);
+	
+	actor->header.next = 0;
+	actor->header.final_func = 0;
+	actor->tick = 0;
 }

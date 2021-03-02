@@ -89,7 +89,7 @@ void link_list_final(link_list* t_list);
 
 typedef struct
 {
-	const char hash;
+	const unsigned char hash;
 	const char* const key;
 	void* data;
 
@@ -103,7 +103,7 @@ typedef struct
 } hash_list, *p_hash_list;
 
 /* hash functions */
-char hash_string(const char* t_string);
+unsigned char hash_string(const char* t_string);
 
 /* allocates and initialize a hash pair */
 p_hash_pair hash_pair_alloc(const char* t_key, void* t_data);

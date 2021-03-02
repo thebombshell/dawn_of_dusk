@@ -13,7 +13,7 @@ typedef const char *dod_cstring;
 typedef short int dod_short;
 typedef unsigned short int dod_ushort;
 typedef int dod_word;
-typedef unsigned int dod_word;
+typedef unsigned int dod_uword;
 typedef long long int dod_dword;
 typedef unsigned long long int dod_udword;
 typedef float dod_single;

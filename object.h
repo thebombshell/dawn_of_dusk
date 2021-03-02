@@ -12,8 +12,6 @@
 #define DOD_OBJECT_EXTENSION_ACTOR (0x00000001)
 #define DOD_OBJECT_EXTENSION_RIGIDBODY (0x00000002)
 
-typedef void (*dod_object_extension_final_func)(dod_object_extension_header* t_extension);
-
 typedef union {
 	
 	dod_udword value;
@@ -32,11 +30,13 @@ typedef union {
 	
 } dod_object_info;
 
+typedef void (*dod_object_extension_final_func)(void* t_extension);
+
 typedef struct dod_object_extension_header {
 	
 	dod_uword type;
 	struct dod_object_extension_header* next;
-	dod_object_extension_final_func final_callback;
+	dod_object_extension_final_func final_func;
 	
 } dod_object_extension_header;
 
@@ -46,6 +46,7 @@ typedef struct {
 	dod_uword chunk_x, chunk_y, chunk_z;
 	dod_single x, y, z;
 	dod_single rotation;
+	dod_object_info info;
 	dod_object_extension_header* next;
 	
 } dod_object;
