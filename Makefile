@@ -20,7 +20,11 @@ DEFINES = -DNDEBUG
 OPTIMIZE = -Os -s
 endif
 
-all: clean build
+all: clean folders build
+
+folders:
+	-mkdir objects
+	-mkdir output
 
 build: $(OBJECTS) main/main.c main/main.h
 	$(C) $(DEFINES) $(OPTIMIZE) $(CFLAGS) $(OBJECTS) $(INCLUDE) -Imain main/main.c -o output/main.exe $(LDFLAGS)
