@@ -7,16 +7,13 @@
 #define DOD_THREAD_H
 
 typedef void* op_thread;
-
 typedef void* op_atomic;
-
 typedef void* op_mutex;
-
 typedef void* op_semaphore;
 
-typedef void (*thread_func)();
+typedef void (*thread_func)(void* t_arg);
 
-void thread_init(op_thread* t_thread, thread_func t_func);
+void thread_init(op_thread* t_thread, thread_func t_func, void* t_arg);
 
 void thread_final(op_thread* t_thread);
 
@@ -45,6 +42,8 @@ void mutex_wait(op_mutex t_mutex);
 unsigned int mutex_wait_timeout(op_mutex t_mutex, unsigned long long int t_ms);
 
 unsigned int mutex_try(op_mutex t_mutex);
+
+void mutex_release(op_mutex t_mutex);
 
 void semaphore_init(op_semaphore* t_semaphore, unsigned long long int t_value, unsigned long long int t_limit);
 

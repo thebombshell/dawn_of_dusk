@@ -7,8 +7,6 @@
 
 #include "thread.h"
 
-#include "c89atomic.h"
-
 #include <assert.h>
 #include <windows.h>
 
@@ -16,23 +14,25 @@ typedef struct {
 	
 	HANDLE thread;
 	thread_func func;
+	void* argument;
 	
 } thread_impl;
 
 DWORD WINAPI thread_proc(LPVOID t_param) {
 	
 	thread_impl* thread = (thread_impl*)t_param;
-	thread->func();
+	thread->func(thread->argument);
 	
 	return 0;
 }
 
-void thread_init(op_thread* t_thread, thread_func t_func) {
+void thread_init(op_thread* t_thread, thread_func t_func, void* t_arg) {
 	
 	assert(t_thread && t_func);
 	
 	thread_impl* output = (thread_impl*)malloc(sizeof(thread_impl));
 	output->func = t_func;
+	output->argument = t_arg;
 	output->thread = CreateThread(0, 0, thread_proc, output, 0, 0);
 	assert(output->thread);
 	*t_thread = (op_thread)output;
@@ -63,62 +63,6 @@ unsigned int thread_join_timeout(op_thread t_thread, unsigned long long int t_ms
 	thread_impl* thread = (thread_impl*)t_thread;
 	DWORD result = WaitForSingleObject(thread->thread, (DWORD)t_ms);
 	return result == 0 ? 1 : 0;
-}
-
-typedef struct {
-	
-	c89atomic_uint64 value;
-	
-} atomic_impl;
-
-void atomic_init(op_atomic* t_atomic, unsigned long long int t_value) {
-	
-	assert(t_atomic);
-	
-	atomic_impl* output = (atomic_impl*)malloc(sizeof(atomic_impl));
-	c89atomic_store_64(&output->value, t_value);
-	
-	*t_atomic = (op_atomic)output;
-}
-
-void atomic_final(op_atomic* t_atomic) {
-	
-	assert(t_atomic);
-	
-	free(t_atomic);
-	*t_atomic = 0;
-}
-
-unsigned long long int atomic_increment(op_atomic t_atomic) {
-	
-	assert(t_atomic);
-	
-	atomic_impl* atomic = (atomic_impl*)t_atomic;
-	return (unsigned long long int)c89atomic_fetch_add_64(&atomic->value, 1);
-}
-
-unsigned long long int atomic_decrement(op_atomic t_atomic) {
-	
-	assert(t_atomic);
-	
-	atomic_impl* atomic = (atomic_impl*)t_atomic;
-	return (unsigned long long int)c89atomic_fetch_sub_64(&atomic->value, 1);
-}
-
-void atomic_set(op_atomic t_atomic, unsigned long long int t_value) {
-	
-	assert(t_atomic);
-	
-	atomic_impl* atomic = (atomic_impl*)t_atomic;
-	c89atomic_store_64(&atomic->value, t_value);
-}
-
-unsigned long long int atomic_get(op_atomic t_atomic) {
-	
-	assert(t_atomic);
-	
-	atomic_impl* atomic = (atomic_impl*)t_atomic;
-	return (unsigned long long int)c89atomic_load_64(&atomic->value);
 }
 
 typedef struct {
@@ -170,6 +114,14 @@ unsigned int mutex_try(op_mutex t_mutex) {
 	mutex_impl* mutex = (mutex_impl*)t_mutex;
 	DWORD result = WaitForSingleObject(mutex->mutex, 0);
 	return result == 0 ? 1 : 0;
+}
+
+void mutex_release(op_mutex t_mutex) {
+	
+	assert(t_mutex);
+	
+	mutex_impl* mutex = (mutex_impl*)t_mutex;
+	ReleaseMutex(mutex->mutex);
 }
 
 typedef struct {
