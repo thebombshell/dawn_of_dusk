@@ -10,6 +10,7 @@
 #include <assert.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include <stdlib.h>
 
 typedef struct {
 	
