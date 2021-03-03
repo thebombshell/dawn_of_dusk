@@ -37,7 +37,7 @@ void thread_init(op_thread* t_thread, thread_func t_func, void* t_arg) {
 	thread_impl* output = (thread_impl*)malloc(sizeof(thread_impl));
 	output->func = t_func;
 	output->argument = t_arg;
-	pthread_create(&output->thread, 0, thread_proc, t_func, t_arg); 
+	pthread_create(&output->thread, 0, thread_proc, output); 
 }
 
 void thread_final(op_thread* t_thread) {
