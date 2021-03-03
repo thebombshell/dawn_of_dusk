@@ -8,7 +8,7 @@
 #include "thread.h"
 
 #include <assert.h>
-#include <pthreads.h>
+#include <pthread.h>
 #include <semaphore.h>
 
 typedef struct {
