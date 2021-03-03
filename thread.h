@@ -32,7 +32,7 @@ unsigned long long int atomic_increment(op_atomic t_atomic);
 
 unsigned long long int atomic_decrement(op_atomic t_atomic);
 
-unsigned long long int atomic_set(op_atomic t_atomic);
+void atomic_set(op_atomic t_atomic, unsigned long long int t_value);
 
 unsigned long long int atomic_get(op_atomic t_atomic);
 

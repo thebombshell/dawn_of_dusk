@@ -8,8 +8,15 @@ SOURCES := $(wildcard *.c)
 OBJECTS := $(patsubst %.c, objects/%.o, $(SOURCES))
 
 INCLUDE :=
-LDFLAGS := -lopengl32 -lgdi32 -shared-libgcc
+LDFLAGS := -shared-libgcc
 GDBFLAGS = -cd ./output/
+
+TARGET = WIN32
+ifeq ($(TARGET), WIN32)
+LDFLAGS = -lgdi32 -shared-libgcc
+else ifeq ($(TARGET), LINUX)
+LDFLAGS = -shared-libgcc
+endif
 
 DEBUG = FALSE
 ifeq ($(DEBUG), TRUE)
@@ -23,14 +30,21 @@ endif
 all: clean folders build
 
 folders:
+	-mkdir depends
 	-mkdir objects
 	-mkdir output
 
-build: $(OBJECTS) main/main.c main/main.h
+build: $(DEPENDS) $(OBJECTS) main/main.c main/main.h
 	$(C) $(DEFINES) $(OPTIMIZE) $(CFLAGS) $(OBJECTS) $(INCLUDE) -Imain main/main.c -o output/main.exe $(LDFLAGS)
 
-./objects/%.o: ./%.c  ./%.h
+
+./objects/%.o: ./%.c ./depends/%.d
 	$(C) $(DEFINES) $(CFLAGS) $(INCLUDE) -c $< -o $@
+
+DEPENDS := $(SOURCES:%.c=./depends/%.d)
+
+$(DEPENDS):
+include $(wildcard $(DEPENDS))
 
 clean:
 	-rm ./objects/*.o ./output/*.exe -f

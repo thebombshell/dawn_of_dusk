@@ -1,11 +1,15 @@
 
+/**
+ * thread_win32.c
+ */
+
+#ifdef _WIN32
+
 #include "thread.h"
 
-#include <assert.h>
-
-#ifdef WIN32
-
 #include "c89atomic.h"
+
+#include <assert.h>
 #include <windows.h>
 
 typedef struct {
@@ -15,10 +19,12 @@ typedef struct {
 	
 } thread_impl;
 
-DWORD WINAPI thread_proc(_In_ LPVOID t_param) {
+DWORD WINAPI thread_proc(LPVOID t_param) {
 	
 	thread_impl* thread = (thread_impl*)t_param;
 	thread->func();
+	
+	return 0;
 }
 
 void thread_init(op_thread* t_thread, thread_func t_func) {
@@ -54,7 +60,8 @@ unsigned int thread_join_timeout(op_thread t_thread, unsigned long long int t_ms
 	
 	assert(t_thread);
 	
-	DWORD result = WaitForSingleObject(t_thread->thread, (DWORD)t_ms);
+	thread_impl* thread = (thread_impl*)t_thread;
+	DWORD result = WaitForSingleObject(thread->thread, (DWORD)t_ms);
 	return result == 0 ? 1 : 0;
 }
 
@@ -64,14 +71,14 @@ typedef struct {
 	
 } atomic_impl;
 
-void atomic_init(op_atomic* t_atmoic, unsigned long long int t_value) {
+void atomic_init(op_atomic* t_atomic, unsigned long long int t_value) {
 	
 	assert(t_atomic);
 	
 	atomic_impl* output = (atomic_impl*)malloc(sizeof(atomic_impl));
 	c89atomic_store_64(&output->value, t_value);
 	
-	*t_atmoic = (op_atomic)output;
+	*t_atomic = (op_atomic)output;
 }
 
 void atomic_final(op_atomic* t_atomic) {
@@ -86,7 +93,7 @@ unsigned long long int atomic_increment(op_atomic t_atomic) {
 	
 	assert(t_atomic);
 	
-	atomic_impl* atomic = (atomic_impl*)t_atmoic;
+	atomic_impl* atomic = (atomic_impl*)t_atomic;
 	return (unsigned long long int)c89atomic_fetch_add_64(&atomic->value, 1);
 }
 
@@ -94,7 +101,7 @@ unsigned long long int atomic_decrement(op_atomic t_atomic) {
 	
 	assert(t_atomic);
 	
-	atomic_impl* atomic = (atomic_impl*)t_atmoic;
+	atomic_impl* atomic = (atomic_impl*)t_atomic;
 	return (unsigned long long int)c89atomic_fetch_sub_64(&atomic->value, 1);
 }
 
@@ -102,7 +109,7 @@ void atomic_set(op_atomic t_atomic, unsigned long long int t_value) {
 	
 	assert(t_atomic);
 	
-	atomic_impl* atomic = (atomic_impl*)t_atmoic;
+	atomic_impl* atomic = (atomic_impl*)t_atomic;
 	c89atomic_store_64(&atomic->value, t_value);
 }
 
@@ -110,7 +117,7 @@ unsigned long long int atomic_get(op_atomic t_atomic) {
 	
 	assert(t_atomic);
 	
-	atomic_impl* atomic = (atomic_impl*)t_atmoic;
+	atomic_impl* atomic = (atomic_impl*)t_atomic;
 	return (unsigned long long int)c89atomic_load_64(&atomic->value);
 }
 
@@ -175,49 +182,55 @@ void semaphore_init(op_semaphore* t_semaphore, unsigned long long int t_value, u
 	
 	assert(t_semaphore && t_limit);
 	
-	semaphore_impl* semahpore = (semahpore_impl*)malloc(sizeof(semaphore_impl));
-	semaphore->semaphore = CreateSemahpore(0, (LONG)t_value, (LONG)t_limit, 0);
+	semaphore_impl* semaphore = (semaphore_impl*)malloc(sizeof(semaphore_impl));
+	semaphore->semaphore = CreateSemaphore(0, (LONG)t_value, (LONG)t_limit, 0);
 	assert(semaphore->semaphore);
-	*t_semaphore = (op_semaphore)semahpore;
+	*t_semaphore = (op_semaphore)semaphore;
 }
 
 void semaphore_final(op_semaphore* t_semaphore) {
 	
 	assert(t_semaphore);
 	
-	semaphore_impl* semaphore = (semaphore_impl*)t_semahpore;
+	semaphore_impl* semaphore = (semaphore_impl*)t_semaphore;
 	CloseHandle(semaphore->semaphore);
 	free(*t_semaphore);
-	*t_semahpore = 0;
+	*t_semaphore = 0;
 }
 
 void semahpore_wait(op_semaphore t_semaphore) {
 	
-	assert(t_mutex);
+	assert(t_semaphore);
 	
-	mutex_impl* mutex = (mutex_impl*)t_mutex;
-	WaitForSingleObject(mutex->mutex, INFINITE);
+	semaphore_impl* semaphore = (semaphore_impl*)t_semaphore;
+	WaitForSingleObject(semaphore->semaphore, INFINITE);
 }
 
 
 unsigned int semahpore_wait_timeout(op_semaphore t_semaphore, unsigned long long int t_ms) {
 	
-	assert(t_mutex);
+	assert(t_semaphore);
 	
-	mutex_impl* mutex = (mutex_impl*)t_semaphore;
-	DWORD result = WaitForSingleObject(mutex->mutex, (DWORD)t_ms);
+	semaphore_impl* semaphore = (semaphore_impl*)t_semaphore;
+	DWORD result = WaitForSingleObject(semaphore->semaphore, (DWORD)t_ms);
 	return result == 0 ? 1 : 0;
 }
 
 unsigned int semahpore_try(op_semaphore t_semaphore) {
 	
-	assert(t_mutex);
+	assert(t_semaphore);
 	
-	mutex_impl* mutex = (mutex_impl*)t_mutex;
-	DWORD result = WaitForSingleObject(mutex->mutex, 0);
+	semaphore_impl* semaphore = (semaphore_impl*)t_semaphore;
+	DWORD result = WaitForSingleObject(semaphore->semaphore, 0);
 	return result == 0 ? 1 : 0;
 }
 
-void semaphore_signal(op_semaphore t_semaphore, unsigned long long int t_value);
+void semaphore_signal(op_semaphore t_semaphore, unsigned long long int t_value) {
+	
+	assert(t_semaphore);
+	
+	semaphore_impl* semaphore = (semaphore_impl*)t_semaphore;
+	ReleaseSemaphore(semaphore->semaphore, t_value, 0);
+}
 
 #endif
