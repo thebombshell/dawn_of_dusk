@@ -15,7 +15,7 @@ TARGET = WIN32
 ifeq ($(TARGET), WIN32)
 LDFLAGS = -lgdi32 -shared-libgcc
 else ifeq ($(TARGET), LINUX)
-CFLAGS = -std=c89 -Wall -Werror -Wfatal-errors -pthread
+CFLAGS = -std=c89 -Wall -Werror -Wfatal-errors -pthread -D_GNU_SOURCE
 LDFLAGS = -lm -shared-libgcc
 endif
 
