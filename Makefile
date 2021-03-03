@@ -15,7 +15,7 @@ TARGET = WIN32
 ifeq ($(TARGET), WIN32)
 LDFLAGS = -lgdi32 -shared-libgcc
 else ifeq ($(TARGET), LINUX)
-LDFLAGS = -shared-libgcc
+LDFLAGS = -lm -shared-libgcc
 endif
 
 DEBUG = FALSE
