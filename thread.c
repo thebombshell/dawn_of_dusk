@@ -7,6 +7,7 @@
 
 #include <assert.h>
 #include "c89atomic.h"
+#include <stdlib.h>
 
 typedef struct {
 	
