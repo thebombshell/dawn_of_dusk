@@ -38,6 +38,7 @@ void thread_init(op_thread* t_thread, thread_func t_func, void* t_arg) {
 	output->func = t_func;
 	output->argument = t_arg;
 	pthread_create(&output->thread, 0, thread_proc, output); 
+	*t_thread = (op_thread)output;
 }
 
 void thread_final(op_thread* t_thread) {
@@ -45,7 +46,7 @@ void thread_final(op_thread* t_thread) {
 	assert(t_thread);
 	
 	thread_impl* thread = (thread_impl*)(*t_thread);
-	free(*t_thread);
+	free(thread);
 	*t_thread = 0;
 }
 
@@ -54,7 +55,7 @@ void thread_join(op_thread t_thread) {
 	assert(t_thread);
 	
 	thread_impl* thread = (thread_impl*)t_thread;
-	pthread_join(t_thread, 0);
+	pthread_join(thread->thread, 0);
 }
 
 unsigned int thread_join_timeout(op_thread t_thread, unsigned long long int t_ms) {
@@ -67,11 +68,11 @@ unsigned int thread_join_timeout(op_thread t_thread, unsigned long long int t_ms
 	
 		long int ms = (long int)(t_ms % 1000); 
 		struct timespec timeout = { .tv_sec=(time_t)((t_ms - ms) / 1000), .tv_nsec=ms * 1000000 };
-		pthread_timedjoin_np(t_thread, 0, &timeout);
+		pthread_timedjoin_np(thread->thread, 0, &timeout);
 	}
 	else {
 		
-		pthread_tryjoin_np(t_thread, 0);
+		pthread_tryjoin_np(thread->thread, 0);
 	}
 }
 
