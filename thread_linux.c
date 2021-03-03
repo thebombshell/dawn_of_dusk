@@ -153,7 +153,7 @@ void semaphore_init(op_semaphore* t_semaphore, unsigned long long int t_value, u
 	semaphore_impl* output = (semaphore_impl*)malloc(sizeof(semaphore_impl));
 	if (sem_init(&output->semaphore, 0, t_value) != 0)
 	{
-		assert(false && "sem_init failed");
+		assert(0 && "sem_init failed");
 	}
 	*t_semaphore = output;
 }
