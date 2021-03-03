@@ -11,6 +11,31 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+void dod_object_extension_header_init(dod_object_extension_header* t_header, dod_object_extension_type type, dod_object_extension_final_func t_final_func) {
+	
+	assert(t_header);
+	
+	t_header->type = type;
+	t_header->next = 0;
+	t_header->mutex = 0;
+	mutex_init(&t_header->mutex, 1);
+	t_header->final_func = t_final_func;
+	
+	mutex_release(t_header->mutex);
+}
+
+void dod_object_extension_header_final(dod_object_extension_header* t_header) {
+	
+	assert(t_header);
+	
+	t_header->type = 0;
+	t_header->next = 0;
+	mutex_wait(t_header->mutex);
+	mutex_final(&t_header->mutex);
+	t_header->final_func = 0;
+	
+}
+
 void dod_object_init(dod_object* t_object, dod_uword t_chunk_x, dod_uword t_chunk_y, dod_uword t_chunk_z, dod_single t_x, dod_single t_y, dod_single t_z) {
 	
 	assert(t_object);
@@ -112,10 +137,15 @@ void dod_object_set_rotation(dod_object* t_object, dod_single t_rotation) {
 	t_object->info.flags.rotation_dirty = 1;
 }
 
-void dod_object_extend(dod_object* t_object, void* t_next) {
+void dod_object_extend(dod_object* t_object, dod_object_extension_header* t_next) {
 	
-	assert(t_object && !t_object->next);
+	assert(t_object);
+	assert(!t_next->next && "an extension must be non-extended (next == 0), the object may be multiple extended instead");
 	
+	if (t_object->next) {
+		
+		t_next->next = t_object->next;
+	}
 	t_object->next = t_next;
 	t_object->info.flags.next_dirty = 1;
 }

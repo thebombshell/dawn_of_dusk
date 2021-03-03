@@ -10,9 +10,7 @@ void dod_object_extension_actor_init(dod_object_extension_actor* t_extension, do
 	
 	assert(t_extension && t_tick);
 	
-	t_extension->header.type = DOD_OBJECT_EXTENSION_ACTOR;
-	t_extension->header.next = 0;
-	t_extension->header.final_func = dod_object_extension_actor_final;
+	dod_object_extension_header_init(&t_extension->header, DOD_OBJECT_EXTENSION_ACTOR, dod_object_extension_actor_final);
 	t_extension->tick = t_tick;
 }
 
@@ -24,7 +22,6 @@ void dod_object_extension_actor_final(void* t_extension) {
 	
 	assert(actor->header.type == DOD_OBJECT_EXTENSION_ACTOR);
 	
-	actor->header.next = 0;
-	actor->header.final_func = 0;
+	dod_object_extension_header_final(&actor->header);
 	actor->tick = 0;
 }
