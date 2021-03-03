@@ -68,12 +68,9 @@ unsigned int thread_join_timeout(op_thread t_thread, unsigned long long int t_ms
 	
 		long int ms = (long int)(t_ms % 1000); 
 		struct timespec timeout = { .tv_sec=(time_t)((t_ms - ms) / 1000), .tv_nsec=ms * 1000000 };
-		pthread_timedjoin_np(thread->thread, 0, &timeout);
+		return pthread_timedjoin_np(thread->thread, 0, &timeout) ? 0 : 1;
 	}
-	else {
-		
-		pthread_tryjoin_np(thread->thread, 0);
-	}
+	return pthread_tryjoin_np(thread->thread, 0) ? 0 : 1;
 }
 
 typedef struct {
