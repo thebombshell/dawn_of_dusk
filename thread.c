@@ -3,7 +3,7 @@
  * thread.c
  */
 
-#include "thread.c"
+#include "thread.h"
 
 #include <assert.h>
 #include "c89atomic.h"
